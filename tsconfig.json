@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "allowJs": true,
+    "resolveJsonModule": true,
+    "jsx": "react-jsx", // Add this line
+    "jsxImportSource": "react" // Add if using React 17+ new JSX transform
+  },
+  "include": ["src"],
+  "exclude": ["node_modules", "dist", "tests"]
+}

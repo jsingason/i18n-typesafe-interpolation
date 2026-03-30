@@ -1,0 +1,1 @@
+export { createI18nTypes } from './hooks/useNSTranslation';
