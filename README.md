@@ -47,12 +47,24 @@ export type Translations = typeof resources.EN;
 ```ts
 // i18n.ts
 import i18n from 'i18next';
+import { initReactI18next } from 'react-i18next';
 import { createTypedT } from 'i18n-typesafe-interpolation';
-import { Translations } from './translations';
+import { createNamespaceHook } from 'i18n-typesafe-interpolation/hooks';
+import { resources, Translations } from './translations';
 
-// ... configure i18n as usual ...
+i18n.use(initReactI18next).init({
+  resources,
+  lng: 'EN',
+  fallbackLng: 'EN',
+  interpolation: {
+    escapeValue: false, // React already escapes values
+  },
+});
 
 export const t = createTypedT<Translations>(i18n);
+export const useNS = createNamespaceHook<Translations>();
+
+export default i18n;
 ```
 
 ### 3. Call with full type safety
