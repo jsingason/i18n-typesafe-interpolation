@@ -1,6 +1,6 @@
 {
   "name": "i18n-typesafe-interpolation",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Typesafe interpolation values for i18n keys in react-i18next",
   "homepage": "https://github.com/jsingason/i18n-typesafe-interpolation#readme",
   "bugs": {
@@ -73,7 +73,7 @@
   },
   "peerDependencies": {
     "i18next": ">=20.0.0",
-    "react": "^16.8.0 || ^17.0.0 || ^18.0.0",
+    "react": ">=16.8.0",
     "react-i18next": ">=11.0.0"
   },
   "peerDependenciesMeta": {
