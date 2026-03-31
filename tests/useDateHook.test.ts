@@ -1,5 +1,4 @@
-// tests/useDateHook.test.ts
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useLocalizedDate } from '../src/hooks/useDateHook';
 import { useTranslation } from 'react-i18next';
 
@@ -57,6 +56,7 @@ describe('useLocalizedDate', () => {
     
     // Create a spy on Intl.DateTimeFormat that will throw for our test case
     const originalDateTimeFormat = Intl.DateTimeFormat;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const mockDateTimeFormat = function(this: any, locale?: string | string[], options?: Intl.DateTimeFormatOptions) {
       if (locale === 'not-a-real-locale-xyz') {
         throw new Error('Invalid language tag');

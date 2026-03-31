@@ -1,1 +1,10 @@
-export { createI18nTypes } from './hooks/useNSTranslation';
+export { createTypedT } from './typed-t';
+export type {
+  InterpolationKeys,
+  ExtractInterpolationKeys,
+  Namespaces,
+  NamespaceTranslations,
+  NamespaceKeys,
+  SimpleTranslationInterpolations,
+  I18nInstance,
+} from './types';
