@@ -1,11 +1,22 @@
 import { renderHook } from '@testing-library/react';
+import { useTranslation } from 'react-i18next';
 import { createNamespaceHook } from '../src/hooks';
+
+// `mock`-prefixed names are exempt from jest's hoisting guard, so this can be
+// referenced from inside the factory and asserted on from the tests.
+const mockT = jest.fn((key: string, options?: Record<string, string>) =>
+  options ? `${key}|${JSON.stringify(options)}` : key,
+);
 
 jest.mock('react-i18next', () => ({
   useTranslation: jest.fn(() => ({
-    t: (key: string) => key,
+    t: mockT,
   })),
 }));
+
+beforeEach(() => {
+  jest.clearAllMocks();
+});
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const mockResources = {
@@ -28,20 +39,38 @@ const useNS = createNamespaceHook<Resources>();
 // ---------------------------------------------------------------------------
 
 describe('useNamespaceTranslation — runtime', () => {
-  it('returns the key for a plain translation', () => {
+  it('passes the requested namespace to react-i18next', () => {
+    renderHook(() => useNS('common'));
+    expect(useTranslation).toHaveBeenCalledWith('common');
+  });
+
+  it('passes the namespace array through in multi-namespace mode', () => {
+    renderHook(() => useNS(['common', 'errors'] as const));
+    expect(useTranslation).toHaveBeenCalledWith(['common', 'errors']);
+  });
+
+  it('forwards the key to the underlying t for a plain translation', () => {
     const { result } = renderHook(() => useNS('common'));
     expect(result.current.t('hello')).toBe('hello');
+    expect(mockT).toHaveBeenCalledWith('hello', undefined);
   });
 
-  it('returns the key when interpolation options are supplied', () => {
+  it('forwards interpolation options to the underlying t', () => {
     const { result } = renderHook(() => useNS('common'));
-    expect(result.current.t('greeting', { name: 'Alice' })).toBe('greeting');
+    expect(result.current.t('greeting', { name: 'Alice' })).toBe('greeting|{"name":"Alice"}');
+    expect(mockT).toHaveBeenCalledWith('greeting', { name: 'Alice' });
   });
 
-  it('supports multi-namespace mode', () => {
+  it('forwards namespaced keys and options in multi-namespace mode', () => {
     const { result } = renderHook(() => useNS(['common', 'errors'] as const));
+
     expect(result.current.t('common:hello')).toBe('common:hello');
-    expect(result.current.t('errors:notFound')).toBe('errors:notFound');
+    expect(mockT).toHaveBeenCalledWith('common:hello', undefined);
+
+    expect(result.current.t('errors:serverError', { code: '500' })).toBe(
+      'errors:serverError|{"code":"500"}',
+    );
+    expect(mockT).toHaveBeenCalledWith('errors:serverError', { code: '500' });
   });
 });
 

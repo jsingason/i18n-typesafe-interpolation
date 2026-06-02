@@ -42,6 +42,8 @@
   ],
   "scripts": {
     "test": "jest",
+    "test:coverage": "jest --coverage",
+    "typecheck": "tsc -p tests/tsconfig.json",
     "dev": "tsc -w",
     "build": "tsc && tsc -p tsconfig.esm.json",
     "format": "prettier --write \"src/**/*.ts\"",
@@ -54,6 +56,7 @@
     "url": "git+https://github.com/jsingason/i18n-typesafe-interpolation.git"
   },
   "devDependencies": {
+    "@eslint/js": "^9.39.4",
     "@testing-library/react": "^14.0.0",
     "@types/jest": "^29.5.0",
     "@types/react": "^18.0.0",
@@ -77,8 +80,12 @@
     "react-i18next": ">=11.0.0"
   },
   "peerDependenciesMeta": {
-    "react": { "optional": true },
-    "react-i18next": { "optional": true }
+    "react": {
+      "optional": true
+    },
+    "react-i18next": {
+      "optional": true
+    }
   },
   "directories": {
     "test": "tests"

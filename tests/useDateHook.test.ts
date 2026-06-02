@@ -10,9 +10,18 @@ jest.mock('react-i18next', () => ({
 }));
 
 describe('useLocalizedDate', () => {
+  let consoleErrorSpy: jest.SpyInstance;
+
   beforeEach(() => {
     // Reset mocks
     jest.clearAllMocks();
+    // The hook logs to console.error on its fallback paths; keep test output
+    // clean while still asserting it was called where relevant.
+    consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    consoleErrorSpy.mockRestore();
   });
 
   it('should format date according to locale', () => {
@@ -75,8 +84,61 @@ describe('useLocalizedDate', () => {
     
     // Should fall back to ISO string
     expect(result.current(testDate)).toBe(testDate.toISOString());
-    
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      'Error creating DateTimeFormat:',
+      expect.any(Error),
+    );
+
     // Restore the original implementation
     spy.mockRestore();
+  });
+
+  it('falls back to ISO string when formatting (not construction) throws', () => {
+    (useTranslation as jest.Mock).mockReturnValue({
+      i18n: { language: 'en-US' },
+    });
+
+    // The formatter is constructed successfully, but .format() throws. This
+    // exercises the formatDate catch branch (distinct from the constructor
+    // catch branch covered above).
+    const throwingFormatter = {
+      format: () => {
+        throw new Error('format boom');
+      },
+    } as unknown as Intl.DateTimeFormat;
+    const spy = jest
+      .spyOn(Intl, 'DateTimeFormat')
+      .mockImplementation(() => throwingFormatter);
+
+    const testDate = new Date('2023-01-15T12:00:00Z');
+    const { result } = renderHook(() => useLocalizedDate());
+
+    expect(result.current(testDate)).toBe(testDate.toISOString());
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      'Error formatting date:',
+      expect.any(Error),
+    );
+
+    spy.mockRestore();
+  });
+
+  it('reuses the same formatter across re-renders when locale and options are stable', () => {
+    (useTranslation as jest.Mock).mockReturnValue({
+      i18n: { language: 'en-US' },
+    });
+
+    const constructorSpy = jest.spyOn(Intl, 'DateTimeFormat');
+    // A stable options reference is required for useMemo to cache the formatter.
+    const options = { year: 'numeric' } as const;
+
+    const { rerender } = renderHook(() => useLocalizedDate(options));
+    const callsAfterFirstRender = constructorSpy.mock.calls.length;
+
+    rerender();
+
+    // No new formatter should be constructed on re-render.
+    expect(constructorSpy.mock.calls.length).toBe(callsAfterFirstRender);
+
+    constructorSpy.mockRestore();
   });
 });
